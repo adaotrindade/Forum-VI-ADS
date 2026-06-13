@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistema de Comunicações Ambientais</title>
+  <style>
+    :root {
+      --ink: #16251d;
+      --muted: #607066;
+      --forest: #174632;
+      --leaf: #2d7b4f;
+      --moss: #85aa58;
+      --aqua: #dceee8;
+      --mist: #f5f9f4;
+      --paper: rgba(255, 255, 255, 0.68);
+      --paper-strong: rgba(255, 255, 255, 0.82);
+      --line: rgba(31, 77, 51, 0.18);
+      --shadow: 0 18px 45px rgba(26, 53, 38, 0.13);
+      --soft-shadow: 0 10px 26px rgba(27, 64, 43, 0.11);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        linear-gradient(145deg, rgba(222, 238, 226, 0.84), rgba(248, 250, 246, 0.92) 42%, rgba(226, 239, 232, 0.9)),
+        #eef6ef;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(115deg, rgba(255, 255, 255, 0.48), transparent 34%),
+        repeating-linear-gradient(102deg, rgba(31, 75, 50, 0.04) 0 1px, transparent 1px 42px);
+      opacity: 0.9;
+      z-index: -3;
+    }
+
+    .page {
+      position: relative;
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 22px 0 56px;
+    }
+
+    .decor {
+      position: fixed;
+      pointer-events: none;
+      z-index: -2;
+      color: rgba(39, 81, 54, 0.22);
+    }
+
+    .decor-topography {
+      width: min(560px, 75vw);
+      top: 50px;
+      right: -150px;
+    }
+
+    .decor-leaves-left {
+      width: 230px;
+      left: -54px;
+      top: 210px;
+      color: rgba(42, 91, 57, 0.3);
+    }
+
+    .decor-leaves-right {
+      width: 240px;
+      right: -78px;
+      bottom: 80px;
+      color: rgba(42, 91, 57, 0.25);
+      transform: rotate(-8deg);
+    }
+
+    .icon {
+      width: 22px;
+      height: 22px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.9;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex: 0 0 auto;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px;
+      margin-bottom: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.52);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      box-shadow: var(--soft-shadow);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .brand-mark,
+    .round-action {
+      display: inline-grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border: 1px solid rgba(35, 83, 52, 0.14);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--forest);
+      box-shadow: 0 10px 24px rgba(31, 66, 45, 0.12);
+    }
+
+    .brand-title {
+      display: grid;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .brand-title strong {
+      font-size: 0.94rem;
+      letter-spacing: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .brand-title span {
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .nav-links {
+      display: none;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .nav-links a,
+    .chip,
+    .ghost-button {
+      border: 1px solid rgba(35, 83, 52, 0.16);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.56);
+      color: var(--forest);
+      font: inherit;
+      font-size: 0.88rem;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform 180ms ease, background 180ms ease, border-color 180ms ease, color 180ms ease;
+    }
+
+    .nav-links a {
+      padding: 10px 14px;
+    }
+
+    .nav-links a:hover,
+    .chip:hover,
+    .ghost-button:hover {
+      transform: translateY(-1px);
+      border-color: rgba(45, 123, 79, 0.34);
+      background: rgba(255, 255, 255, 0.82);
+    }
+
+    .hero-grid {
+      display: grid;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    #inicio,
+    #nova-comunicacao,
+    #unidades,
+    #comunicacoes {
+      scroll-margin-top: 96px;
+    }
+
+    .intro-panel,
+    .form-panel,
+    .section-panel,
+    .unit-card,
+    .communication-card,
+    .stat-card {
+      border: 1px solid rgba(42, 87, 56, 0.16);
+      border-radius: var(--radius);
+      background: var(--paper);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      box-shadow: var(--shadow);
+    }
+
+    .intro-panel {
+      position: relative;
+      min-height: 430px;
+      padding: 28px;
+      overflow: hidden;
+      background:
+        linear-gradient(155deg, rgba(255, 255, 255, 0.77), rgba(226, 240, 230, 0.52)),
+        rgba(255, 255, 255, 0.58);
+    }
+
+    .intro-panel::after {
+      content: "";
+      position: absolute;
+      inset: auto -30px -80px 18%;
+      height: 210px;
+      border-radius: 50% 50% 0 0;
+      border: 1px solid rgba(36, 85, 56, 0.11);
+      background:
+        linear-gradient(142deg, rgba(219, 235, 220, 0.76), rgba(255, 255, 255, 0.42)),
+        repeating-linear-gradient(173deg, transparent 0 19px, rgba(43, 82, 56, 0.09) 20px 21px);
+      transform: rotate(-4deg);
+      z-index: -1;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      margin: 0 0 18px;
+      padding: 8px 11px;
+      border: 1px solid rgba(45, 123, 79, 0.18);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.6);
+      color: var(--forest);
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      max-width: 640px;
+      margin-bottom: 12px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2.45rem, 8vw, 5.2rem);
+      line-height: 0.94;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      max-width: 590px;
+      color: #354a3d;
+      font-size: clamp(1rem, 2vw, 1.18rem);
+      line-height: 1.6;
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 32px;
+    }
+
+    .stat-card {
+      min-height: 104px;
+      padding: 14px;
+      display: grid;
+      align-content: space-between;
+      background: rgba(255, 255, 255, 0.58);
+      box-shadow: var(--soft-shadow);
+    }
+
+    .stat-card strong {
+      color: var(--forest);
+      font-size: clamp(1.45rem, 5vw, 2.2rem);
+      line-height: 1;
+    }
+
+    .stat-card span {
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .quick-actions a {
+      display: grid;
+      min-height: 102px;
+      align-content: space-between;
+      gap: 14px;
+      padding: 14px;
+      border: 1px solid rgba(42, 87, 56, 0.16);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.54);
+      color: var(--ink);
+      text-decoration: none;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      box-shadow: var(--soft-shadow);
+      transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+    }
+
+    .quick-actions a:hover {
+      transform: translateY(-2px);
+      border-color: rgba(45, 123, 79, 0.3);
+      background: rgba(255, 255, 255, 0.76);
+    }
+
+    .quick-actions span {
+      font-weight: 850;
+      line-height: 1.08;
+    }
+
+    .form-panel {
+      padding: 22px;
+      background:
+        linear-gradient(150deg, rgba(255, 255, 255, 0.82), rgba(239, 247, 239, 0.68)),
+        var(--paper);
+    }
+
+    .panel-heading {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .panel-kicker {
+      margin: 0 0 8px;
+      color: var(--leaf);
+      font-size: 0.77rem;
+      font-weight: 850;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      margin-bottom: 8px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1.7rem, 5vw, 2.55rem);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .panel-heading p,
+    .section-lead {
+      margin-bottom: 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    label {
+      color: var(--ink);
+      font-weight: 820;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      min-height: 54px;
+      border: 1px solid rgba(47, 82, 58, 0.23);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--ink);
+      font: inherit;
+      font-size: 1rem;
+      outline: none;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+      transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+    }
+
+    input,
+    textarea {
+      padding: 15px 48px 15px 16px;
+    }
+
+    textarea {
+      min-height: 126px;
+      resize: vertical;
+      line-height: 1.45;
+    }
+
+    select {
+      appearance: none;
+      padding: 15px 48px 15px 16px;
+      cursor: pointer;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: rgba(45, 123, 79, 0.62);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 0 0 4px rgba(75, 138, 88, 0.13);
+    }
+
+    .field-icon {
+      position: absolute;
+      right: 15px;
+      top: 16px;
+      color: rgba(45, 73, 53, 0.66);
+      pointer-events: none;
+    }
+
+    .select-icon {
+      top: 17px;
+    }
+
+    .submit-row {
+      display: grid;
+      gap: 12px;
+      margin-top: 4px;
+    }
+
+    .primary-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 58px;
+      border: 0;
+      border-radius: 999px;
+      color: #fff;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0) 32%),
+        linear-gradient(135deg, #174632 0%, #2f7b52 56%, #96b85a 100%);
+      font: inherit;
+      font-size: 1.02rem;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 18px 32px rgba(39, 98, 62, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+      transition: transform 180ms ease, box-shadow 180ms ease;
+    }
+
+    .primary-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 22px 38px rgba(39, 98, 62, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+
+    .primary-button:active {
+      transform: translateY(0);
+    }
+
+    .form-note {
+      min-height: 20px;
+      margin: 0;
+      color: var(--leaf);
+      font-size: 0.9rem;
+      font-weight: 800;
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+
+    .form-note.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .content-section {
+      margin-top: 22px;
+    }
+
+    .section-panel {
+      padding: 22px;
+    }
+
+    .units-grid,
+    .communications-grid {
+      display: grid;
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .unit-card,
+    .communication-card {
+      padding: 18px;
+      background: rgba(255, 255, 255, 0.6);
+      box-shadow: var(--soft-shadow);
+      transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+    }
+
+    .unit-card:hover,
+    .communication-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(45, 123, 79, 0.28);
+      background: rgba(255, 255, 255, 0.74);
+    }
+
+    .unit-top,
+    .communication-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .unit-icon,
+    .communication-icon {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border: 1px solid rgba(45, 123, 79, 0.16);
+      border-radius: var(--radius);
+      background: linear-gradient(145deg, rgba(232, 244, 233, 0.86), rgba(255, 255, 255, 0.68));
+      color: var(--forest);
+      flex: 0 0 auto;
+    }
+
+    .unit-card h3,
+    .communication-card h3 {
+      margin-bottom: 7px;
+      font-size: 1.06rem;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    .unit-card p,
+    .communication-card p {
+      margin-bottom: 0;
+      color: var(--muted);
+      line-height: 1.48;
+    }
+
+    .unit-meta,
+    .communication-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 15px;
+    }
+
+    .mini-pill,
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 30px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      color: var(--forest);
+      background: rgba(233, 244, 234, 0.76);
+      border: 1px solid rgba(45, 123, 79, 0.13);
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    .ghost-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 42px;
+      margin-top: 16px;
+      padding: 10px 14px;
+    }
+
+    .filter-bar {
+      display: flex;
+      gap: 8px;
+      margin-top: 18px;
+      padding-bottom: 2px;
+      overflow-x: auto;
+      scrollbar-width: thin;
+    }
+
+    .chip {
+      flex: 0 0 auto;
+      padding: 10px 13px;
+    }
+
+    .chip.is-active {
+      color: #fff;
+      background: linear-gradient(135deg, #174632, #337d52);
+      border-color: rgba(23, 70, 50, 0.2);
+      box-shadow: 0 12px 22px rgba(39, 98, 62, 0.18);
+    }
+
+    .communications-toolbar {
+      display: grid;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .communication-card {
+      display: grid;
+      gap: 14px;
+    }
+
+    .communication-card p {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .status-enviada {
+      color: #1c5d3d;
+      background: rgba(216, 239, 222, 0.85);
+    }
+
+    .status-analise {
+      color: #6b5b1d;
+      background: rgba(244, 232, 183, 0.72);
+    }
+
+    .status-respondida {
+      color: #1b5b65;
+      background: rgba(209, 234, 238, 0.78);
+    }
+
+    .empty-state {
+      display: none;
+      padding: 18px;
+      border: 1px dashed rgba(45, 123, 79, 0.25);
+      border-radius: var(--radius);
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.46);
+    }
+
+    .empty-state.is-visible {
+      display: block;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: min(390px, calc(100vw - 36px));
+      padding: 14px 16px;
+      border: 1px solid rgba(45, 123, 79, 0.18);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.83);
+      color: var(--forest);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(12px);
+      transition: opacity 220ms ease, transform 220ms ease;
+      z-index: 20;
+    }
+
+    .toast.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast strong {
+      display: block;
+      line-height: 1.2;
+    }
+
+    .toast span {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    @media (max-width: 640px) {
+      .page {
+        width: min(100% - 22px, 460px);
+        padding-top: 12px;
+      }
+
+      .topbar {
+        position: sticky;
+        top: 10px;
+        z-index: 10;
+      }
+
+      .intro-panel,
+      .form-panel,
+      .section-panel {
+        padding: 18px;
+      }
+
+      .intro-panel {
+        min-height: auto;
+      }
+
+      .stats-row,
+      .quick-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .stat-card,
+      .quick-actions a {
+        min-height: 86px;
+      }
+
+      .panel-heading {
+        display: grid;
+      }
+    }
+
+    @media (min-width: 700px) {
+      .units-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .communications-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .communications-toolbar {
+        grid-template-columns: minmax(0, 1fr) auto;
+      }
+    }
+
+    @media (min-width: 920px) {
+      .nav-links {
+        display: flex;
+      }
+
+      .hero-grid {
+        grid-template-columns: minmax(0, 1.05fr) minmax(380px, 0.78fr);
+      }
+
+      .form-panel {
+        position: sticky;
+        top: 18px;
+        align-self: start;
+      }
+
+      .units-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <svg width="0" height="0" aria-hidden="true" focusable="false">
+    <symbol id="icon-leaf" viewBox="0 0 24 24">
+      <path d="M5 21c4.7-7.8 10.1-11.9 16-12.1" />
+      <path d="M7.4 17.1C4.6 12.5 5.2 7.4 9.3 3c5.8 1.2 9.5 4.1 11.2 8.8-4.6 1-8.9 2.8-13.1 5.3Z" />
+    </symbol>
+    <symbol id="icon-tree" viewBox="0 0 24 24">
+      <path d="M12 21V9" />
+      <path d="M8.4 13.2 12 16.8l3.6-3.6" />
+      <path d="M8 16.8H6.8a5 5 0 0 1-1.2-9.8 6.4 6.4 0 0 1 12.3-.5 4.9 4.9 0 0 1-.8 9.7H16" />
+    </symbol>
+    <symbol id="icon-map" viewBox="0 0 24 24">
+      <path d="m9 18-6 3V6l6-3 6 3 6-3v15l-6 3-6-3Z" />
+      <path d="M9 3v15" />
+      <path d="M15 6v15" />
+    </symbol>
+    <symbol id="icon-message" viewBox="0 0 24 24">
+      <path d="M21 13.5a6.5 6.5 0 0 1-6.5 6.5H8l-5 3v-9.5A6.5 6.5 0 0 1 9.5 7h5A6.5 6.5 0 0 1 21 13.5Z" />
+      <path d="M8 12h8" />
+      <path d="M8 15h5" />
+    </symbol>
+    <symbol id="icon-mail" viewBox="0 0 24 24">
+      <path d="M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" />
+      <path d="m22 7-10 7L2 7" />
+    </symbol>
+    <symbol id="icon-list" viewBox="0 0 24 24">
+      <path d="M8 6h13" />
+      <path d="M8 12h13" />
+      <path d="M8 18h13" />
+      <path d="M3 6h.01" />
+      <path d="M3 12h.01" />
+      <path d="M3 18h.01" />
+    </symbol>
+    <symbol id="icon-send" viewBox="0 0 24 24">
+      <path d="m22 2-7 20-4-9-9-4 20-7Z" />
+      <path d="M22 2 11 13" />
+    </symbol>
+    <symbol id="icon-clock" viewBox="0 0 24 24">
+      <path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z" />
+      <path d="M12 6v6l4 2" />
+    </symbol>
+    <symbol id="icon-user" viewBox="0 0 24 24">
+      <path d="M20 21a8 8 0 0 0-16 0" />
+      <path d="M12 13a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z" />
+    </symbol>
+    <symbol id="icon-chevron" viewBox="0 0 24 24">
+      <path d="m6 9 6 6 6-6" />
+    </symbol>
+    <symbol id="icon-check" viewBox="0 0 24 24">
+      <path d="M20 6 9 17l-5-5" />
+    </symbol>
+  </svg>
+
+  <svg class="decor decor-topography" viewBox="0 0 600 420" aria-hidden="true">
+    <path d="M83 255c72-82 149-114 231-96 75 16 111-44 170-61 49-14 84 3 106 50" stroke="currentColor" fill="none" stroke-width="2" />
+    <path d="M41 310c88-105 178-150 270-136 88 13 128-50 196-70 54-16 94 2 121 53" stroke="currentColor" fill="none" stroke-width="2" />
+    <path d="M116 199c52-52 108-69 166-50 58 19 86-24 130-37 38-12 70 1 96 38" stroke="currentColor" fill="none" stroke-width="2" />
+    <path d="M149 344c56-60 114-86 174-78 60 9 96-36 143-48 36-10 68 0 94 31" stroke="currentColor" fill="none" stroke-width="2" />
+    <path d="M250 236c26-21 55-27 88-19 39 10 61-21 91-28 24-6 45 2 62 22" stroke="currentColor" fill="none" stroke-width="2" />
+    <circle cx="442" cy="145" r="11" fill="none" stroke="currentColor" stroke-width="2" />
+    <path d="M442 156v32" stroke="currentColor" stroke-width="2" />
+  </svg>
+
+  <svg class="decor decor-leaves-left" viewBox="0 0 220 320" aria-hidden="true">
+    <path d="M77 302C72 210 94 124 143 42" stroke="currentColor" fill="none" stroke-width="2" />
+    <path d="M120 87c-39 6-64 27-74 64 39-4 65-25 74-64Z" fill="rgba(82, 119, 76, 0.16)" stroke="currentColor" />
+    <path d="M90 178c-38-1-65 14-82 45 37 2 65-13 82-45Z" fill="rgba(82, 119, 76, 0.16)" stroke="currentColor" />
+    <path d="M137 126c31 6 51 24 61 53-31-4-52-22-61-53Z" fill="rgba(82, 119, 76, 0.14)" stroke="currentColor" />
+    <path d="M111 232c31 3 53 19 66 48-31-1-54-17-66-48Z" fill="rgba(82, 119, 76, 0.14)" stroke="currentColor" />
+  </svg>
+
+  <svg class="decor decor-leaves-right" viewBox="0 0 220 320" aria-hidden="true">
+    <path d="M129 314C119 226 89 143 39 64" stroke="currentColor" fill="none" stroke-width="2" />
+    <path d="M67 111c38 4 64 24 77 59-38-2-65-21-77-59Z" fill="rgba(82, 119, 76, 0.15)" stroke="currentColor" />
+    <path d="M105 193c39-5 68 8 89 39-38 7-68-6-89-39Z" fill="rgba(82, 119, 76, 0.14)" stroke="currentColor" />
+    <path d="M47 171c-29 12-46 33-51 64 29-10 47-31 51-64Z" fill="rgba(82, 119, 76, 0.13)" stroke="currentColor" />
+  </svg>
+
+  <main class="page">
+    <header class="topbar" aria-label="Barra superior">
+      <a class="brand" href="#inicio" aria-label="Ir para o início">
+        <span class="brand-mark"><svg class="icon"><use href="#icon-tree"></use></svg></span>
+        <span class="brand-title">
+          <strong>Unidades</strong>
+          <span>Sistema ambiental</span>
+        </span>
+      </a>
+      <nav class="nav-links" aria-label="Navegação principal">
+        <a href="#unidades">Unidades</a>
+        <a href="#nova-comunicacao">Nova comunicação</a>
+        <a href="#comunicacoes">Comunicações</a>
+      </nav>
+      <a class="round-action" href="#nova-comunicacao" aria-label="Postar nova comunicação">
+        <svg class="icon"><use href="#icon-message"></use></svg>
+      </a>
+    </header>
+
+    <section id="inicio" class="hero-grid" aria-labelledby="titulo-pagina">
+      <article class="intro-panel">
+        <p class="eyebrow"><svg class="icon"><use href="#icon-leaf"></use></svg> Gestão de conservação</p>
+        <h1 id="titulo-pagina">Comunicações para unidades de conservação</h1>
+        <p class="lead">Registre ocorrências, acompanhe retornos e consulte mensagens vinculadas aos parques e reservas estaduais em uma interface leve, clara e pronta para uso em campo.</p>
+
+        <div class="stats-row" aria-label="Resumo do sistema">
+          <div class="stat-card">
+            <strong id="stat-units">4</strong>
+            <span>Unidades cadastradas</span>
+          </div>
+          <div class="stat-card">
+            <strong id="stat-total">0</strong>
+            <span>Comunicações</span>
+          </div>
+          <div class="stat-card">
+            <strong id="stat-analysis">0</strong>
+            <span>Em análise</span>
+          </div>
+        </div>
+
+        <div class="quick-actions" aria-label="Atalhos do sistema">
+          <a href="#unidades">
+            <svg class="icon"><use href="#icon-map"></use></svg>
+            <span>Consultar unidades</span>
+          </a>
+          <a href="#nova-comunicacao">
+            <svg class="icon"><use href="#icon-send"></use></svg>
+            <span>Postar comunicação</span>
+          </a>
+          <a href="#comunicacoes">
+            <svg class="icon"><use href="#icon-list"></use></svg>
+            <span>Minhas comunicações</span>
+          </a>
+        </div>
+      </article>
+
+      <aside id="nova-comunicacao" class="form-panel" aria-labelledby="form-title">
+        <div class="panel-heading">
+          <div>
+            <p class="panel-kicker">Nova comunicação</p>
+            <h2 id="form-title">Enviar registro</h2>
+            <p>Associe a comunicação a uma unidade de conservação.</p>
+          </div>
+          <span class="brand-mark" aria-hidden="true"><svg class="icon"><use href="#icon-leaf"></use></svg></span>
+        </div>
+
+        <form id="communication-form" class="form-grid">
+          <div class="field">
+            <label for="title">Título da comunicação</label>
+            <div class="input-wrap">
+              <input id="title" name="title" type="text" placeholder="Digite o assunto da comunicação" required />
+              <svg class="icon field-icon"><use href="#icon-leaf"></use></svg>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="description">Descrição detalhada</label>
+            <div class="input-wrap">
+              <textarea id="description" name="description" placeholder="Descreva a situação observada, local aproximado e informações relevantes..." required></textarea>
+              <svg class="icon field-icon"><use href="#icon-message"></use></svg>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="email">E-mail do responsável</label>
+            <div class="input-wrap">
+              <input id="email" name="email" type="email" placeholder="seuemail@email.com" required />
+              <svg class="icon field-icon"><use href="#icon-mail"></use></svg>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="unit">Unidade de conservação de referência</label>
+            <div class="input-wrap">
+              <select id="unit" name="unit" required>
+                <option value="">Selecione a unidade...</option>
+              </select>
+              <svg class="icon field-icon select-icon"><use href="#icon-chevron"></use></svg>
+            </div>
+          </div>
+
+          <div class="submit-row">
+            <button class="primary-button" type="submit">
+              Enviar comunicação
+              <svg class="icon"><use href="#icon-send"></use></svg>
+            </button>
+            <p id="form-note" class="form-note" role="status" aria-live="polite">Comunicação cadastrada com sucesso.</p>
+          </div>
+        </form>
+      </aside>
+    </section>
+
+    <section id="unidades" class="content-section section-panel" aria-labelledby="units-title">
+      <div class="panel-heading">
+        <div>
+          <p class="panel-kicker">Unidades cadastradas</p>
+          <h2 id="units-title">Consultar unidades de conservação</h2>
+          <p class="section-lead">Cada card reúne o contexto da unidade e leva diretamente às comunicações vinculadas.</p>
+        </div>
+        <span class="brand-mark" aria-hidden="true"><svg class="icon"><use href="#icon-map"></use></svg></span>
+      </div>
+      <div id="units-grid" class="units-grid"></div>
+    </section>
+
+    <section id="comunicacoes" class="content-section section-panel" aria-labelledby="communications-title">
+      <div class="communications-toolbar">
+        <div>
+          <p class="panel-kicker">Histórico</p>
+          <h2 id="communications-title">Comunicações enviadas</h2>
+          <p class="section-lead" id="communications-subtitle">Mais recentes primeiro.</p>
+        </div>
+        <button class="ghost-button" id="clear-filter" type="button">
+          <svg class="icon"><use href="#icon-list"></use></svg>
+          Ver todas
+        </button>
+      </div>
+      <div id="filter-bar" class="filter-bar" aria-label="Filtrar comunicações por unidade"></div>
+      <div id="communications-grid" class="communications-grid"></div>
+      <p id="empty-state" class="empty-state">Nenhuma comunicação cadastrada para esta unidade.</p>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <span class="brand-mark" aria-hidden="true"><svg class="icon"><use href="#icon-check"></use></svg></span>
+    <span>
+      <strong>Comunicação enviada</strong>
+      <span>A lista foi atualizada automaticamente.</span>
+    </span>
+  </div>
+
+  <script>
+    const units = [
+      {
+        id: "rio-vermelho",
+        icon: "tree",
+        name: "Parque Estadual do Rio Vermelho",
+        description: "Área costeira com restingas, trilhas interpretativas e mosaicos de vegetação nativa próximos ao mar."
+      },
+      {
+        id: "serra-tabuleiro",
+        icon: "map",
+        name: "Parque Estadual da Serra do Tabuleiro",
+        description: "Maior parque estadual catarinense, com encostas, nascentes e paisagens estratégicas para a biodiversidade."
+      },
+      {
+        id: "araucarias",
+        icon: "leaf",
+        name: "Parque Estadual das Araucárias",
+        description: "Unidade dedicada à proteção de remanescentes florestais, fauna associada e áreas de recuperação ambiental."
+      },
+      {
+        id: "sassafras",
+        icon: "leaf",
+        name: "Reserva Biológica Estadual do Sassafrás",
+        description: "Reserva de proteção integral com formações florestais sensíveis e foco em pesquisa e conservação."
+      }
+    ];
+
+    const statuses = ["Enviada", "Em análise", "Respondida"];
+    const state = {
+      activeUnit: "all",
+      communications: [
+        {
+          id: crypto.randomUUID(),
+          title: "Sinalização danificada em acesso secundário",
+          description: "Foi identificada placa inclinada próxima ao início de uma trilha educativa. A orientação visual está parcialmente comprometida em dias de baixa luminosidade.",
+          email: "monitoramento.uc@example.org",
+          unitId: "rio-vermelho",
+          createdAt: new Date(Date.now() - 1000 * 60 * 28).toISOString(),
+          status: "Em análise"
+        },
+        {
+          id: crypto.randomUUID(),
+          title: "Registro de lixo em ponto de visitação",
+          description: "Equipe de campo observou resíduos leves próximos ao mirante. Recomenda-se reforço na comunicação educativa e recolhimento preventivo.",
+          email: "campo.tabuleiro@example.org",
+          unitId: "serra-tabuleiro",
+          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(),
+          status: "Enviada"
+        },
+        {
+          id: crypto.randomUUID(),
+          title: "Manutenção de passarela",
+          description: "Trecho de madeira apresenta desgaste superficial após período de chuva. A passagem segue utilizável, mas demanda vistoria técnica.",
+          email: "gestao.araucarias@example.org",
+          unitId: "araucarias",
+          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 21).toISOString(),
+          status: "Respondida"
+        },
+        {
+          id: crypto.randomUUID(),
+          title: "Solicitação de vistoria em limite da reserva",
+          description: "Comunicação recebida sobre ruído de maquinário em área próxima ao limite oeste. É necessário confirmar a localização com a equipe regional.",
+          email: "reserva.sassafras@example.org",
+          unitId: "sassafras",
+          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 32).toISOString(),
+          status: "Em análise"
+        }
+      ]
+    };
+
+    const unitSelect = document.querySelector("#unit");
+    const unitsGrid = document.querySelector("#units-grid");
+    const filterBar = document.querySelector("#filter-bar");
+    const communicationsGrid = document.querySelector("#communications-grid");
+    const emptyState = document.querySelector("#empty-state");
+    const form = document.querySelector("#communication-form");
+    const formNote = document.querySelector("#form-note");
+    const toast = document.querySelector("#toast");
+    const clearFilterButton = document.querySelector("#clear-filter");
+    const communicationsSubtitle = document.querySelector("#communications-subtitle");
+
+    const iconForUnit = {
+      tree: "icon-tree",
+      map: "icon-map",
+      leaf: "icon-leaf"
+    };
+
+    function escapeHTML(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function getUnit(unitId) {
+      return units.find((unit) => unit.id === unitId);
+    }
+
+    function formatDate(isoDate) {
+      return new Intl.DateTimeFormat("pt-BR", {
+        dateStyle: "short",
+        timeStyle: "short"
+      }).format(new Date(isoDate));
+    }
+
+    function statusClass(status) {
+      return {
+        "Enviada": "status-enviada",
+        "Em análise": "status-analise",
+        "Respondida": "status-respondida"
+      }[status];
+    }
+
+    function renderSelectOptions() {
+      units.forEach((unit) => {
+        const option = document.createElement("option");
+        option.value = unit.id;
+        option.textContent = unit.name;
+        unitSelect.append(option);
+      });
+    }
+
+    function renderUnits() {
+      unitsGrid.innerHTML = units.map((unit) => {
+        const count = state.communications.filter((item) => item.unitId === unit.id).length;
+        const iconId = iconForUnit[unit.icon] || "icon-leaf";
+
+        return `
+          <article class="unit-card">
+            <div class="unit-top">
+              <span class="unit-icon" aria-hidden="true"><svg class="icon"><use href="#${iconId}"></use></svg></span>
+              <span class="mini-pill">${count} ${count === 1 ? "registro" : "registros"}</span>
+            </div>
+            <h3>${escapeHTML(unit.name)}</h3>
+            <p>${escapeHTML(unit.description)}</p>
+            <div class="unit-meta">
+              <span class="mini-pill"><svg class="icon"><use href="#icon-map"></use></svg> Unidade estadual</span>
+            </div>
+            <button class="ghost-button" type="button" data-unit="${unit.id}">
+              <svg class="icon"><use href="#icon-message"></use></svg>
+              Visualizar comunicações
+            </button>
+          </article>
+        `;
+      }).join("");
+
+      unitsGrid.querySelectorAll("[data-unit]").forEach((button) => {
+        button.addEventListener("click", () => {
+          setActiveUnit(button.dataset.unit);
+          document.querySelector("#comunicacoes").scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      });
+    }
+
+    function renderFilters() {
+      const filters = [{ id: "all", name: "Todas" }, ...units];
+      filterBar.innerHTML = filters.map((filter) => `
+        <button class="chip ${state.activeUnit === filter.id ? "is-active" : ""}" type="button" data-filter="${filter.id}">
+          ${escapeHTML(filter.name)}
+        </button>
+      `).join("");
+
+      filterBar.querySelectorAll("[data-filter]").forEach((button) => {
+        button.addEventListener("click", () => setActiveUnit(button.dataset.filter));
+      });
+    }
+
+    function filteredCommunications() {
+      return state.communications
+        .filter((communication) => state.activeUnit === "all" || communication.unitId === state.activeUnit)
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    }
+
+    function renderCommunications() {
+      const list = filteredCommunications();
+      const unitName = state.activeUnit === "all" ? "" : getUnit(state.activeUnit).name;
+
+      communicationsSubtitle.textContent = state.activeUnit === "all"
+        ? "Mais recentes primeiro."
+        : `Mostrando comunicações de ${unitName}.`;
+
+      communicationsGrid.innerHTML = list.map((communication) => {
+        const unit = getUnit(communication.unitId);
+        return `
+          <article class="communication-card">
+            <div class="communication-top">
+              <span class="communication-icon" aria-hidden="true"><svg class="icon"><use href="#icon-message"></use></svg></span>
+              <span class="status-pill ${statusClass(communication.status)}">${communication.status}</span>
+            </div>
+            <div>
+              <h3>${escapeHTML(communication.title)}</h3>
+              <p>${escapeHTML(communication.description)}</p>
+            </div>
+            <div class="communication-meta">
+              <span class="mini-pill"><svg class="icon"><use href="#icon-mail"></use></svg> ${escapeHTML(communication.email)}</span>
+              <span class="mini-pill"><svg class="icon"><use href="#icon-map"></use></svg> ${escapeHTML(unit.name)}</span>
+              <span class="mini-pill"><svg class="icon"><use href="#icon-clock"></use></svg> ${formatDate(communication.createdAt)}</span>
+            </div>
+          </article>
+        `;
+      }).join("");
+
+      emptyState.classList.toggle("is-visible", list.length === 0);
+    }
+
+    function renderStats() {
+      document.querySelector("#stat-units").textContent = units.length;
+      document.querySelector("#stat-total").textContent = state.communications.length;
+      document.querySelector("#stat-analysis").textContent = state.communications.filter((item) => item.status === "Em análise").length;
+    }
+
+    function setActiveUnit(unitId) {
+      state.activeUnit = unitId;
+      renderFilters();
+      renderCommunications();
+    }
+
+    function showSuccess() {
+      formNote.classList.add("is-visible");
+      toast.classList.add("is-visible");
+
+      window.setTimeout(() => {
+        formNote.classList.remove("is-visible");
+        toast.classList.remove("is-visible");
+      }, 3400);
+    }
+
+    function rerender() {
+      renderStats();
+      renderUnits();
+      renderFilters();
+      renderCommunications();
+    }
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const data = new FormData(form);
+      const unitId = data.get("unit");
+
+      state.communications.push({
+        id: crypto.randomUUID(),
+        title: data.get("title").trim(),
+        description: data.get("description").trim(),
+        email: data.get("email").trim(),
+        unitId,
+        createdAt: new Date().toISOString(),
+        status: statuses[Math.floor(Math.random() * statuses.length)]
+      });
+
+      form.reset();
+      state.activeUnit = unitId;
+      rerender();
+      showSuccess();
+      document.querySelector("#comunicacoes").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    clearFilterButton.addEventListener("click", () => setActiveUnit("all"));
+
+    renderSelectOptions();
+    rerender();
+  </script>
+</body>
+</html>
